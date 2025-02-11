@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Website Edukasi</title>
+    <style>
+        body {
+            text-align: center;
+            font-family: Arial, sans-serif;
+        }
+        .header {
+            position: relative;
+        }
+        .header img {
+            width: 100%;
+            height: auto;
+        }
+        .header .title {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 24px;
+            font-weight: bold;
+            color: white;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 10px;
+        }
+        canvas {
+            border: 2px solid black;
+            margin: 20px 0;
+        }
+        .info {
+            padding: 20px;
+        }
+        .footer {
+            font-weight: bold;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <img src="header.jpg" alt="Website Edukasi">
+        <div class="title">Website Edukasi</div>
+    </div>
+    
+    <canvas id="gameCanvas" width="320" height="480"></canvas>
+    <button onclick="startGame()">Start</button>
+    <p id="score">Rekor: 0</p>
+    <button onclick="pauseGame()">Pause</button>
+    <p id="message"></p>
+    
+    <div class="info">
+        <h2>Tentang Web App</h2>
+        <p>Website ini dibuat untuk edukasi dengan menyertakan game sederhana mirip Flappy Bird. Game ini menguji refleks dan kesabaran pemain.</p>
+    </div>
+    
+    <div class="footer">BY AI & DER</div>
+    
+    <script>
+        let canvas = document.getElementById("gameCanvas");
+        let ctx = canvas.getContext("2d");
+        let bird = { x: 50, y: 150, width: 34, height: 24, velocity: 0 };
+        let pipes = [];
+        let gravity = 0.5;
+        let gameRunning = false;
+        let score = 0;
+        let highScore = 0;
+        let paused = false;
+
+        function drawBird() {
+            ctx.fillStyle = "red";
+            ctx.fillRect(bird.x, bird.y, bird.width, bird.height);
+        }
+
+        function drawPipes() {
+            ctx.fillStyle = "green";
+            pipes.forEach(pipe => {
+                ctx.fillRect(pipe.x, 0, pipe.width, pipe.top);
+                ctx.fillRect(pipe.x, pipe.bottom, pipe.width, canvas.height - pipe.bottom);
+            });
+        }
+
+        function updateGame() {
+            if (!gameRunning || paused) return;
+            bird.velocity += gravity;
+            bird.y += bird.velocity;
+
+            if (bird.y + bird.height >= canvas.height) {
+                gameOver();
+            }
+
+            pipes.forEach(pipe => {
+                pipe.x -= 2;
+                if (pipe.x + pipe.width < 0) {
+                    pipes.shift();
+                    score++;
+                    document.getElementById("score").innerText = "Rekor: " + score;
+                }
+                if (
+                    bird.x < pipe.x + pipe.width &&
+                    bird.x + bird.width > pipe.x &&
+                    (bird.y < pipe.top || bird.y + bird.height > pipe.bottom)
+                ) {
+                    gameOver();
+                }
+            });
+
+            if (pipes.length === 0 || pipes[pipes.length - 1].x < canvas.width - 150) {
+                let gapSize = 80;
+                let topHeight = Math.random() * (canvas.height / 2);
+                pipes.push({ x: canvas.width, width: 40, top: topHeight, bottom: topHeight + gapSize });
+            }
+            draw();
+            requestAnimationFrame(updateGame);
+        }
+
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            drawBird();
+            drawPipes();
+        }
+
+        function startGame() {
+            gameRunning = true;
+            bird.y = 150;
+            bird.velocity = 0;
+            pipes = [];
+            score = 0;
+            document.getElementById("score").innerText = "Rekor: 0";
+            document.getElementById("message").innerText = "";
+            updateGame();
+        }
+
+        function gameOver() {
+            gameRunning = false;
+            document.getElementById("message").innerText = "Try Again";
+        }
+
+        function pauseGame() {
+            paused = !paused;
+        }
+
+        document.addEventListener("keydown", () => {
+            if (gameRunning) bird.velocity = -8;
+        });
+    </script>
+</body>
+</html>
