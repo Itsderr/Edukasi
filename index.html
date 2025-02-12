@@ -1,84 +1,116 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Website Edukasi</title>
+    <title>Game Balapan</title>
     <style>
         body {
             text-align: center;
             font-family: Arial, sans-serif;
-            background-color: #87CEEB;
+            background-color: #ddd;
         }
         canvas {
-            background: url('https://i.imgur.com/bgLQW5s.png'); /* Ganti dengan gambar background */
+            background: #333;
             display: block;
-            margin: 0 auto;
+            margin: auto;
+        }
+        #pauseButton {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            padding: 10px;
+            background: yellow;
+            border: none;
+            cursor: pointer;
+        }
+        #retryButton {
+            position: absolute;
+            top: 50px;
+            left: 10px;
+            padding: 10px;
+            background: red;
+            border: none;
+            cursor: pointer;
+            display: none;
         }
     </style>
 </head>
 <body>
-    <h1>Website Edukasi</h1>
-    <canvas id="gameCanvas" width="320" height="480"></canvas>
-    <p id="score">Score: 0</p>
-    <button onclick="startGame()">Start</button>
-    <p>Game ini adalah adaptasi Flappy Bird dengan burung asli dan rongga lebih besar.</p>
-    <p>BY AI & DER</p>
-
+    <h1>Game Balapan Sederhana</h1>
+    <button id="pauseButton">Pause</button>
+    <button id="retryButton">🔄 Try Again</button>
+    <canvas id="gameCanvas" width="400" height="600"></canvas>
     <script>
         const canvas = document.getElementById("gameCanvas");
         const ctx = canvas.getContext("2d");
+        const pauseButton = document.getElementById("pauseButton");
+        const retryButton = document.getElementById("retryButton");
 
-        const bird = new Image();
-        bird.src = "https://i.imgur.com/OdL0XPt.png"; // Ganti dengan gambar burung
-        
-        const pipeTop = new Image();
-        pipeTop.src = "https://i.imgur.com/Hw8xV6N.png"; // Ganti dengan gambar pipa atas
-        
-        const pipeBottom = new Image();
-        pipeBottom.src = "https://i.imgur.com/2v9UNjq.png"; // Ganti dengan gambar pipa bawah
-
-        let birdX = 50, birdY = 150, gravity = 1.5;
-        let velocity = 0;
-        let pipes = [{ x: canvas.width, y: Math.random() * (canvas.height / 2) }];
+        let player = { x: 175, y: 500, width: 50, height: 80 };
+        let obstacles = [];
+        let speed = 5;
         let score = 0;
         let gameOver = false;
+        let paused = false;
 
-        function draw() {
+        document.addEventListener("keydown", (event) => {
+            if (!paused) {
+                if (event.key === "ArrowLeft" && player.x > 0) {
+                    player.x -= 20;
+                } else if (event.key === "ArrowRight" && player.x < canvas.width - player.width) {
+                    player.x += 20;
+                }
+            }
+        });
+
+        pauseButton.addEventListener("click", () => {
+            paused = !paused;
+            pauseButton.textContent = paused ? "Resume" : "Pause";
+        });
+
+        retryButton.addEventListener("click", () => {
+            location.reload();
+        });
+
+        function createObstacle() {
+            if (!paused) {
+                let x = Math.random() * (canvas.width - 50);
+                obstacles.push({ x: x, y: 0, width: 50, height: 80 });
+            }
+        }
+
+        function updateGame() {
+            if (gameOver || paused) return;
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-            ctx.drawImage(bird, birdX, birdY, 34, 24);
             
-            for (let i = 0; i < pipes.length; i++) {
-                ctx.drawImage(pipeTop, pipes[i].x, pipes[i].y - pipeTop.height);
-                ctx.drawImage(pipeBottom, pipes[i].x, pipes[i].y + 100); // Rongga lebih besar
-
-                pipes[i].x -= 2;
-                if (pipes[i].x === 150) {
-                    pipes.push({ x: canvas.width, y: Math.random() * (canvas.height / 2) });
+            ctx.fillStyle = "red";
+            ctx.fillRect(player.x, player.y, player.width, player.height);
+            
+            ctx.fillStyle = "black";
+            for (let obs of obstacles) {
+                obs.y += speed;
+                ctx.fillRect(obs.x, obs.y, obs.width, obs.height);
+                if (obs.y > canvas.height) {
+                    obstacles.shift();
+                    score++;
                 }
-
-                if (birdX + 34 > pipes[i].x && birdX < pipes[i].x + pipeTop.width && (birdY < pipes[i].y || birdY + 24 > pipes[i].y + 100)) {
+                if (
+                    player.x < obs.x + obs.width &&
+                    player.x + player.width > obs.x &&
+                    player.y < obs.y + obs.height &&
+                    player.y + player.height > obs.y
+                ) {
                     gameOver = true;
+                    retryButton.style.display = "block";
+                    alert("Game Over! Skor: " + score);
                 }
             }
-
-            velocity += gravity;
-            birdY += velocity;
-            
-            if (birdY > canvas.height - 24) gameOver = true;
-            
-            if (!gameOver) {
-                requestAnimationFrame(draw);
-            } else {
-                alert("Game Over! Try Again");
-                location.reload();
-            }
+            requestAnimationFrame(updateGame);
         }
 
-        function startGame() {
-            document.addEventListener("keydown", () => velocity = -10);
-            draw();
-        }
+        setInterval(createObstacle, 2000);
+        updateGame();
     </script>
 </body>
 </html>
