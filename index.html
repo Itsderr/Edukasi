@@ -25,9 +25,9 @@
         const ctx = canvas.getContext("2d");
 
         let playerImg = new Image();
-        playerImg.src = 'data:image/webp;base64,UklGRnaxAQBXRUJQVlA4IGbCAABwsAOdASoABAAEPjEYi0OiIaERKVzcIAMEtLduUK/fjf6Xm2/GMEX4e6P/T5mX+15mXt/avMY/';
+        playerImg.src = 'mobil-putih-hitam.png'; // Ganti dengan path gambar
         let obstacleImg = new Image();
-        obstacleImg.src = 'data:image/webp;base64,UklGRnaxAQBXRUJQVlA4IGbCAABwsAOdASoABAAEPjEYi0OiIaERKVzcIAMEtLduUK/fjf6Xm2/GMEX4e6P/T5mX+15mXt/avMY/';
+        obstacleImg.src = 'mobil-hitam.png'; // Ganti dengan path gambar
 
         let player = { x: 175, y: 500, width: 50, height: 80 };
         let obstacles = [];
@@ -37,18 +37,21 @@
         let paused = false;
 
         document.addEventListener("keydown", (event) => {
-            if (!paused) {
-                if (event.key === "ArrowLeft" && player.x > 0) {
-                    player.x -= 20;
-                } else if (event.key === "ArrowRight" && player.x < canvas.width - player.width) {
-                    player.x += 20;
+            if (!gameOver) {
+                if (!paused) {
+                    if (event.key === "ArrowLeft" && player.x > 0) {
+                        player.x -= 20;
+                    } else if (event.key === "ArrowRight" && player.x < canvas.width - player.width) {
+                        player.x += 20;
+                    }
+                }
+                if (event.key === "Escape") {
+                    paused = !paused;
+                    if (!paused) updateGame();
                 }
             }
-            if (event.key === "Escape") {
-                paused = !paused;
-            }
             if (event.key === "r" || event.key === "R") {
-                location.reload();
+                resetGame();
             }
         });
 
@@ -83,6 +86,16 @@
                 }
             }
             requestAnimationFrame(updateGame);
+        }
+
+        function resetGame() {
+            player.x = 175;
+            player.y = 500;
+            obstacles = [];
+            score = 0;
+            gameOver = false;
+            paused = false;
+            updateGame();
         }
 
         setInterval(createObstacle, 2000);
