@@ -15,41 +15,39 @@
             display: block;
             margin: auto;
         }
-        #pauseButton {
+        .button {
             position: absolute;
+            padding: 10px;
+            cursor: pointer;
+            color: white;
+            border: none;
+        }
+        #pauseButton {
             top: 10px;
             left: 10px;
             background: red;
-            color: white;
-            border: none;
-            padding: 10px;
-            cursor: pointer;
         }
         #tryAgain {
-            position: absolute;
             top: 50px;
             left: 10px;
             background: blue;
-            color: white;
-            border: none;
-            padding: 10px;
-            cursor: pointer;
         }
     </style>
 </head>
 <body>
     <h1>Game Balapan Sederhana</h1>
-    <button id="pauseButton">Pause</button>
-    <button id="tryAgain">Try Again</button>
+    <button id="pauseButton" class="button">Pause</button>
+    <button id="tryAgain" class="button">Try Again</button>
     <canvas id="gameCanvas" width="400" height="600"></canvas>
     <script>
         const canvas = document.getElementById("gameCanvas");
         const ctx = canvas.getContext("2d");
         
-        let playerImg = new Image();
-        playerImg.src = 'mobil.png'; // Ganti dengan path gambar mobil
-        let obstacleImg = new Image();
-        obstacleImg.src = 'rintangan.png'; // Ganti dengan path gambar rintangan
+        const playerImg = new Image();
+        playerImg.src = 'mobil.png'; 
+        
+        const obstacleImg = new Image();
+        obstacleImg.src = 'rintangan.png';
 
         let player = { x: 175, y: 500, width: 50, height: 80 };
         let obstacles = [];
@@ -58,48 +56,24 @@
         let gameOver = false;
         let paused = false;
 
-        document.addEventListener("keydown", (event) => {
-            if (!gameOver) {
-                if (!paused) {
-                    if (event.key === "ArrowLeft" && player.x > 0) {
-                        player.x -= 20;
-                    } else if (event.key === "ArrowRight" && player.x < canvas.width - player.width) {
-                        player.x += 20;
-                    }
-                }
-                if (event.key === "Escape") {
-                    togglePause();
-                }
-            }
-            if (event.key === "r" || event.key === "R") {
-                resetGame();
-            }
-        });
-
-        document.getElementById("pauseButton").addEventListener("click", togglePause);
-        document.getElementById("tryAgain").addEventListener("click", resetGame);
-
-        function togglePause() {
-            paused = !paused;
-            if (!paused) updateGame();
+        function drawPlayer() {
+            ctx.drawImage(playerImg, player.x, player.y, player.width, player.height);
         }
 
-        function createObstacle() {
-            if (!paused) {
-                let x = Math.random() * (canvas.width - 50);
-                obstacles.push({ x: x, y: 0, width: 50, height: 80 });
+        function drawObstacles() {
+            for (let obs of obstacles) {
+                ctx.drawImage(obstacleImg, obs.x, obs.y, obs.width, obs.height);
             }
         }
 
         function updateGame() {
             if (gameOver || paused) return;
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-            
-            ctx.drawImage(playerImg, player.x, player.y, player.width, player.height);
-            
+            drawPlayer();
+            drawObstacles();
+
             for (let obs of obstacles) {
                 obs.y += speed;
-                ctx.drawImage(obstacleImg, obs.x, obs.y, obs.width, obs.height);
                 if (obs.y > canvas.height) {
                     obstacles.shift();
                     score++;
@@ -117,6 +91,13 @@
             requestAnimationFrame(updateGame);
         }
 
+        function createObstacle() {
+            if (!paused) {
+                let x = Math.random() * (canvas.width - 50);
+                obstacles.push({ x: x, y: 0, width: 50, height: 80 });
+            }
+        }
+
         function resetGame() {
             player.x = 175;
             player.y = 500;
@@ -126,6 +107,32 @@
             paused = false;
             updateGame();
         }
+
+        function togglePause() {
+            paused = !paused;
+            if (!paused) updateGame();
+        }
+
+        document.addEventListener("keydown", (event) => {
+            if (!gameOver) {
+                if (!paused) {
+                    if (event.key === "ArrowLeft" && player.x > 0) {
+                        player.x -= 20;
+                    } else if (event.key === "ArrowRight" && player.x < canvas.width - player.width) {
+                        player.x += 20;
+                    }
+                }
+                if (event.key === "Escape") {
+                    togglePause();
+                }
+            }
+            if (event.key.toLowerCase() === "r") {
+                resetGame();
+            }
+        });
+
+        document.getElementById("pauseButton").addEventListener("click", togglePause);
+        document.getElementById("tryAgain").addEventListener("click", resetGame);
 
         setInterval(createObstacle, 2000);
         updateGame();
