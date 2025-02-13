@@ -111,8 +111,19 @@
 
         function createObstacle() {
             if (!paused) {
-                let x = Math.random() < 0.5 ? 50 : 300;
-                let speed = x === 50 ? 2 : -5;
+                let lane = Math.floor(Math.random() * 3); // 0 = kiri, 1 = tengah, 2 = kanan
+                let x;
+                let speed;
+                if (lane === 0) {
+                    x = 50;
+                    speed = 5; // kiri lebih cepat
+                } else if (lane === 1) {
+                    x = 175;
+                    speed = 3; // tengah kecepatan sedang
+                } else {
+                    x = 300;
+                    speed = 2; // kanan lebih lambat
+                }
                 obstacles.push({ x: x, y: 0, width: 50, height: 80, speed: speed });
             }
         }
