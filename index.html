@@ -12,10 +12,10 @@
             background-size: cover;
         }
         canvas {
-            background: url('jalan-raya.jpg') no-repeat center center;
-            background-size: cover;
             display: block;
             margin: auto;
+            background: url('jalan-raya.jpg') repeat-y;
+            background-size: cover;
         }
         .button {
             position: absolute;
@@ -94,13 +94,16 @@
         
         const playerImg = new Image();
         const obstacleImg = new Image();
+        const roadImg = new Image();
         let speed = 2;
         let gameStarted = false;
         let gachaResult = "No Effect";
         let gachaAttempts = 5;
+        let roadOffset = 0;
         
         playerImg.src = 'mobil.png';
         obstacleImg.src = 'rintangan.png';
+        roadImg.src = 'jalan-raya.jpg';
 
         let player = { x: 175, y: 500, width: 50, height: 80 };
         let obstacles = [];
@@ -112,6 +115,7 @@
 
         function drawGame() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.drawImage(roadImg, 0, roadOffset, canvas.width, canvas.height * 2);
             ctx.drawImage(playerImg, player.x, player.y, player.width, player.height);
             for (let obs of obstacles) {
                 ctx.drawImage(obstacleImg, obs.x, obs.y, obs.width, obs.height);
@@ -120,6 +124,8 @@
 
         function updateGame() {
             if (!gameStarted || gameOver || paused) return;
+            roadOffset += speed;
+            if (roadOffset >= canvas.height) roadOffset = 0;
             drawGame();
 
             for (let obs of obstacles) {
@@ -176,25 +182,12 @@
             updateGachaDisplay();
         }
 
-        function gacha() {
-            if (gachaAttempts > 0) {
-                const rewards = ["Boost Speed", "Extra Life", "Shield", "No Effect"];
-                gachaResult = rewards[Math.floor(Math.random() * rewards.length)];
-                gachaAttempts--;
-                updateGachaDisplay();
-            }
-        }
-
-        function updateGachaDisplay() {
-            gachaList.innerHTML = "";
-            let li = document.createElement("li");
-            li.textContent = gachaResult;
-            gachaList.appendChild(li);
-            gachaAttemptsDisplay.textContent = "Kesempatan Gacha: " + gachaAttempts;
-        }
+        document.addEventListener("keydown", function(event) {
+            if (event.key === "a" && player.x > 25) player.x -= 75;
+            else if (event.key === "d" && player.x < 325) player.x += 75;
+        });
 
         startButton.addEventListener("click", startGame);
-        gachaButton.addEventListener("click", gacha);
     </script>
 </body>
 </html>
