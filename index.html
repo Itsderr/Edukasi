@@ -51,7 +51,6 @@
 
         let player = { x: 175, y: 500, width: 50, height: 80 };
         let obstacles = [];
-        let speed = 5;
         let score = 0;
         let gameOver = false;
         let paused = false;
@@ -113,16 +112,13 @@
             if (!paused) {
                 let lane = Math.floor(Math.random() * 3); // 0 = kiri, 1 = tengah, 2 = kanan
                 let x;
-                let speed;
+                let speed = 5; // Semua rintangan memiliki kecepatan yang sama sekarang
                 if (lane === 0) {
                     x = 50;
-                    speed = 7; // kiri lebih cepat
                 } else if (lane === 1) {
                     x = 175;
-                    speed = 5; // tengah lebih cepat dari sebelumnya
                 } else {
                     x = 300;
-                    speed = 3; // kanan tetap lebih lambat
                 }
                 obstacles.push({ x: x, y: 0, width: 50, height: 80, speed: speed });
             }
@@ -164,7 +160,7 @@
         document.getElementById("pauseButton").addEventListener("click", togglePause);
         document.getElementById("tryAgain").addEventListener("click", resetGame);
 
-        setInterval(createObstacle, 1500);
+        setInterval(createObstacle, 1200);
         updateGame();
     </script>
 </body>
