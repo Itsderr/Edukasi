@@ -15,19 +15,41 @@
             display: block;
             margin: auto;
         }
+        #pauseButton {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: red;
+            color: white;
+            border: none;
+            padding: 10px;
+            cursor: pointer;
+        }
+        #tryAgain {
+            position: absolute;
+            top: 50px;
+            left: 10px;
+            background: blue;
+            color: white;
+            border: none;
+            padding: 10px;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
     <h1>Game Balapan Sederhana</h1>
+    <button id="pauseButton">Pause</button>
+    <button id="tryAgain">Try Again</button>
     <canvas id="gameCanvas" width="400" height="600"></canvas>
     <script>
         const canvas = document.getElementById("gameCanvas");
         const ctx = canvas.getContext("2d");
-
+        
         let playerImg = new Image();
-        playerImg.src = 'mobil-putih-hitam.png'; // Ganti dengan path gambar
+        playerImg.src = 'mobil.png'; // Ganti dengan path gambar mobil
         let obstacleImg = new Image();
-        obstacleImg.src = 'mobil-hitam.png'; // Ganti dengan path gambar
+        obstacleImg.src = 'rintangan.png'; // Ganti dengan path gambar rintangan
 
         let player = { x: 175, y: 500, width: 50, height: 80 };
         let obstacles = [];
@@ -46,14 +68,21 @@
                     }
                 }
                 if (event.key === "Escape") {
-                    paused = !paused;
-                    if (!paused) updateGame();
+                    togglePause();
                 }
             }
             if (event.key === "r" || event.key === "R") {
                 resetGame();
             }
         });
+
+        document.getElementById("pauseButton").addEventListener("click", togglePause);
+        document.getElementById("tryAgain").addEventListener("click", resetGame);
+
+        function togglePause() {
+            paused = !paused;
+            if (!paused) updateGame();
+        }
 
         function createObstacle() {
             if (!paused) {
