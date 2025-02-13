@@ -11,7 +11,7 @@
             background-color: #ddd;
         }
         canvas {
-            background: #444;
+            background: #666;
             display: block;
             margin: auto;
         }
@@ -57,8 +57,12 @@
         let paused = false;
 
         function drawRoad() {
-            ctx.fillStyle = "#444";
+            ctx.fillStyle = "#666";
             ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            ctx.fillStyle = "#444";
+            ctx.fillRect(100, 0, 200, canvas.height);
+            
             ctx.strokeStyle = "white";
             ctx.lineWidth = 5;
             for (let i = 0; i < canvas.height; i += 40) {
@@ -87,7 +91,7 @@
             drawObstacles();
 
             for (let obs of obstacles) {
-                obs.y += speed;
+                obs.y += obs.speed;
                 if (obs.y > canvas.height) {
                     obstacles.shift();
                     score++;
@@ -108,8 +112,8 @@
         function createObstacle() {
             if (!paused) {
                 let x = Math.random() < 0.5 ? 50 : 300;
-                let direction = x === 50 ? 2 : -2;
-                obstacles.push({ x: x, y: 0, width: 50, height: 80, direction: direction });
+                let speed = x === 50 ? 2 : -5;
+                obstacles.push({ x: x, y: 0, width: 50, height: 80, speed: speed });
             }
         }
 
