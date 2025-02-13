@@ -36,6 +36,19 @@
             font-size: 24px;
             font-weight: bold;
         }
+        #gachaButton {
+            top: 10px;
+            right: 10px;
+            background: green;
+        }
+        #gachaResult {
+            position: absolute;
+            top: 50px;
+            right: 10px;
+            background: yellow;
+            padding: 10px;
+            display: none;
+        }
     </style>
 </head>
 <body>
@@ -43,11 +56,15 @@
     <div id="scoreDisplay">Skor: 0</div>
     <button id="pauseButton" class="button">Pause</button>
     <button id="tryAgain" class="button">Try Again</button>
+    <button id="gachaButton" class="button">Gacha</button>
+    <div id="gachaResult"></div>
     <canvas id="gameCanvas" width="400" height="600"></canvas>
     <script>
         const canvas = document.getElementById("gameCanvas");
         const ctx = canvas.getContext("2d");
         const scoreDisplay = document.getElementById("scoreDisplay");
+        const gachaButton = document.getElementById("gachaButton");
+        const gachaResult = document.getElementById("gachaResult");
         
         const playerImg = new Image();
         const obstacleImg = new Image();
@@ -162,24 +179,17 @@
             if (!paused) updateGame();
         }
 
-        document.addEventListener("keydown", (event) => {
-            if (!gameOver) {
-                if (!paused) {
-                    if (event.key === "ArrowLeft" && player.x > 25) {
-                        player.x -= 75;
-                    } else if (event.key === "ArrowRight" && player.x < 325) {
-                        player.x += 75;
-                    }
-                }
-                if (event.key === "Escape") {
-                    togglePause();
-                }
-            }
-            if (event.key.toLowerCase() === "r") {
-                resetGame();
-            }
-        });
+        function gacha() {
+            const rewards = ["Boost Speed", "Extra Life", "Shield", "No Effect"];
+            const result = rewards[Math.floor(Math.random() * rewards.length)];
+            gachaResult.textContent = "Gacha Result: " + result;
+            gachaResult.style.display = "block";
+            setTimeout(() => {
+                gachaResult.style.display = "none";
+            }, 2000);
+        }
 
+        gachaButton.addEventListener("click", gacha);
         document.getElementById("pauseButton").addEventListener("click", togglePause);
         document.getElementById("tryAgain").addEventListener("click", resetGame);
 
