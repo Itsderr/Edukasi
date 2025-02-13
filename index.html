@@ -54,13 +54,19 @@
         let score = 0;
         let gameOver = false;
         let paused = false;
+        let patternIndex = 0;
+        const patterns = [
+            [1, 0, 1, 0, 1, 0, 1],
+            [0, 1, 0, 1, 0, 1, 0]
+        ];
+        const lanes = [25, 100, 175, 250, 325];
 
         function drawRoad() {
             ctx.fillStyle = "#f5deb3";
             ctx.fillRect(0, 0, canvas.width, canvas.height);
             
             ctx.fillStyle = "#d2b48c";
-            ctx.fillRect(100, 0, 200, canvas.height);
+            ctx.fillRect(75, 0, 250, canvas.height);
             
             ctx.strokeStyle = "white";
             ctx.lineWidth = 5;
@@ -110,11 +116,15 @@
 
         function createObstacle() {
             if (!paused) {
-                let lanes = [50, 175, 300];
                 let speed = 5;
+                let pattern = patterns[patternIndex % patterns.length];
+                patternIndex++;
+                
                 obstacles = [];
-                for (let x of lanes) {
-                    obstacles.push({ x: x, y: 0, width: 50, height: 80, speed: speed });
+                for (let i = 0; i < pattern.length; i++) {
+                    if (pattern[i] === 1) {
+                        obstacles.push({ x: lanes[i], y: 0, width: 50, height: 80, speed: speed });
+                    }
                 }
             }
         }
@@ -137,10 +147,10 @@
         document.addEventListener("keydown", (event) => {
             if (!gameOver) {
                 if (!paused) {
-                    if (event.key === "ArrowLeft" && player.x > 0) {
-                        player.x -= 20;
-                    } else if (event.key === "ArrowRight" && player.x < canvas.width - player.width) {
-                        player.x += 20;
+                    if (event.key === "ArrowLeft" && player.x > 25) {
+                        player.x -= 75;
+                    } else if (event.key === "ArrowRight" && player.x < 325) {
+                        player.x += 75;
                     }
                 }
                 if (event.key === "Escape") {
