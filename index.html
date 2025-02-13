@@ -1,4 +1,4 @@
-\<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="UTF-8">
@@ -12,7 +12,8 @@
             background-size: cover;
         }
         canvas {
-            background: #f5deb3;
+            background: url('jalan-raya.jpg') no-repeat center center;
+            background-size: cover;
             display: block;
             margin: auto;
         }
@@ -62,6 +63,14 @@
             padding: 10px;
             width: 150px;
         }
+        #gachaAttemptsDisplay {
+            position: absolute;
+            top: 100px;
+            right: 10px;
+            background: lightgray;
+            padding: 10px;
+            width: 150px;
+        }
     </style>
 </head>
 <body>
@@ -72,6 +81,7 @@
     <button id="gachaButton" class="button">Gacha</button>
     <button id="startButton">Start</button>
     <div id="gachaResults">Gacha Result: <ul id="gachaList"></ul></div>
+    <div id="gachaAttemptsDisplay">Kesempatan Gacha: 5</div>
     <canvas id="gameCanvas" width="400" height="600"></canvas>
     <script>
         const canvas = document.getElementById("gameCanvas");
@@ -80,6 +90,7 @@
         const gachaButton = document.getElementById("gachaButton");
         const gachaList = document.getElementById("gachaList");
         const startButton = document.getElementById("startButton");
+        const gachaAttemptsDisplay = document.getElementById("gachaAttemptsDisplay");
         
         const playerImg = new Image();
         const obstacleImg = new Image();
@@ -101,8 +112,6 @@
 
         function drawGame() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-            ctx.fillStyle = "#f5deb3";
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
             ctx.drawImage(playerImg, player.x, player.y, player.width, player.height);
             for (let obs of obstacles) {
                 ctx.drawImage(obstacleImg, obs.x, obs.y, obs.width, obs.height);
@@ -181,12 +190,11 @@
             let li = document.createElement("li");
             li.textContent = gachaResult;
             gachaList.appendChild(li);
+            gachaAttemptsDisplay.textContent = "Kesempatan Gacha: " + gachaAttempts;
         }
 
         startButton.addEventListener("click", startGame);
         gachaButton.addEventListener("click", gacha);
-        document.getElementById("pauseButton").addEventListener("click", () => { paused = !paused; if (!paused) updateGame(); });
-        document.getElementById("tryAgain").addEventListener("click", resetGame);
     </script>
 </body>
 </html>
