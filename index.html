@@ -32,21 +32,28 @@
             left: 10px;
             background: blue;
         }
+        #scoreDisplay {
+            font-size: 24px;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
     <h1>Game Balapan Sederhana</h1>
+    <div id="scoreDisplay">Skor: 0</div>
     <button id="pauseButton" class="button">Pause</button>
     <button id="tryAgain" class="button">Try Again</button>
     <canvas id="gameCanvas" width="400" height="600"></canvas>
     <script>
         const canvas = document.getElementById("gameCanvas");
         const ctx = canvas.getContext("2d");
+        const scoreDisplay = document.getElementById("scoreDisplay");
         
         const playerImg = new Image();
         const obstacleImg = new Image();
         let imagesLoaded = 0;
-
+        let speed = 2;
+        
         function checkAllImagesLoaded() {
             imagesLoaded++;
             if (imagesLoaded === 2) {
@@ -65,7 +72,6 @@
         let score = 0;
         let gameOver = false;
         let paused = false;
-        let patternIndex = 0;
         const lanes = [25, 100, 175, 250, 325];
 
         function drawRoad() {
@@ -107,6 +113,8 @@
                 if (obs.y > canvas.height) {
                     obstacles.shift();
                     score++;
+                    speed += 0.1;
+                    scoreDisplay.textContent = "Skor: " + score;
                 }
                 if (
                     player.x < obs.x + obs.width &&
@@ -123,18 +131,8 @@
 
         function createObstacle() {
             if (!paused) {
-                let speed = 5;
                 let newObstacles = [];
-                let pattern = Array(5).fill(0);
-                
-                let filledCount = Math.floor(Math.random() * 3) + 2; 
-                let filledPositions = new Set();
-                while (filledPositions.size < filledCount) {
-                    filledPositions.add(Math.floor(Math.random() * 5));
-                }
-                
-                filledPositions.forEach(pos => pattern[pos] = 1);
-                
+                let pattern = [1, 0, 1, 0, 1];
                 for (let i = 0; i < pattern.length; i++) {
                     if (pattern[i] === 1) {
                         newObstacles.push({ x: lanes[i], y: 0, width: 50, height: 80, speed: speed });
@@ -149,8 +147,10 @@
             player.y = 500;
             obstacles = [];
             score = 0;
+            speed = 2;
             gameOver = false;
             paused = false;
+            scoreDisplay.textContent = "Skor: 0";
             updateGame();
         }
 
