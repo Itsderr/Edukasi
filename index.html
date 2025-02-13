@@ -44,10 +44,21 @@
         const ctx = canvas.getContext("2d");
         
         const playerImg = new Image();
-        playerImg.src = 'mobil.png'; 
-        
         const obstacleImg = new Image();
+        let imagesLoaded = 0;
+
+        function checkAllImagesLoaded() {
+            imagesLoaded++;
+            if (imagesLoaded === 2) {
+                updateGame();
+            }
+        }
+
+        playerImg.src = 'mobil.png'; 
+        playerImg.onload = checkAllImagesLoaded;
+        
         obstacleImg.src = 'rintangan.png';
+        obstacleImg.onload = checkAllImagesLoaded;
 
         let player = { x: 175, y: 500, width: 50, height: 80 };
         let obstacles = [];
@@ -55,10 +66,6 @@
         let gameOver = false;
         let paused = false;
         let patternIndex = 0;
-        const patterns = [
-            [1, 0, 1, 0, 1, 0, 1],
-            [0, 1, 0, 1, 0, 1, 0]
-        ];
         const lanes = [25, 100, 175, 250, 325];
 
         function drawRoad() {
@@ -117,10 +124,17 @@
         function createObstacle() {
             if (!paused) {
                 let speed = 5;
-                let pattern = patterns[patternIndex % patterns.length];
-                patternIndex++;
-                
                 let newObstacles = [];
+                let pattern = Array(5).fill(0);
+                
+                let filledCount = Math.floor(Math.random() * 3) + 2; 
+                let filledPositions = new Set();
+                while (filledPositions.size < filledCount) {
+                    filledPositions.add(Math.floor(Math.random() * 5));
+                }
+                
+                filledPositions.forEach(pos => pattern[pos] = 1);
+                
                 for (let i = 0; i < pattern.length; i++) {
                     if (pattern[i] === 1) {
                         newObstacles.push({ x: lanes[i], y: 0, width: 50, height: 80, speed: speed });
@@ -167,7 +181,6 @@
         document.getElementById("tryAgain").addEventListener("click", resetGame);
 
         setInterval(createObstacle, 1200);
-        updateGame();
     </script>
 </body>
 </html>
