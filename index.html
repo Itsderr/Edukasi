@@ -32,6 +32,15 @@
             left: 10px;
             background: blue;
         }
+        #startButton {
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: orange;
+            padding: 20px;
+            font-size: 20px;
+            position: fixed;
+        }
         #scoreDisplay {
             font-size: 24px;
             font-weight: bold;
@@ -57,6 +66,7 @@
     <button id="pauseButton" class="button">Pause</button>
     <button id="tryAgain" class="button">Try Again</button>
     <button id="gachaButton" class="button">Gacha</button>
+    <button id="startButton">Start</button>
     <div id="gachaResult"></div>
     <canvas id="gameCanvas" width="400" height="600"></canvas>
     <script>
@@ -65,15 +75,17 @@
         const scoreDisplay = document.getElementById("scoreDisplay");
         const gachaButton = document.getElementById("gachaButton");
         const gachaResult = document.getElementById("gachaResult");
+        const startButton = document.getElementById("startButton");
         
         const playerImg = new Image();
         const obstacleImg = new Image();
         let imagesLoaded = 0;
         let speed = 2;
+        let gameStarted = false;
         
         function checkAllImagesLoaded() {
             imagesLoaded++;
-            if (imagesLoaded === 2) {
+            if (imagesLoaded === 2 && gameStarted) {
                 updateGame();
             }
         }
@@ -119,7 +131,7 @@
         }
 
         function updateGame() {
-            if (gameOver || paused) return;
+            if (!gameStarted || gameOver || paused) return;
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             drawRoad();
             drawPlayer();
@@ -146,20 +158,10 @@
             requestAnimationFrame(updateGame);
         }
 
-        function createObstacle() {
-            if (!paused) {
-                let newObstacles = [];
-                let randomPattern = Array.from({ length: 5 }, () => Math.random() < 0.5 ? 1 : 0);
-                let emptyLane = Math.floor(Math.random() * 5);
-                randomPattern[emptyLane] = 0;
-                
-                for (let i = 0; i < randomPattern.length; i++) {
-                    if (randomPattern[i] === 1) {
-                        newObstacles.push({ x: lanes[i], y: -100, width: 50, height: 80, speed: speed });
-                    }
-                }
-                obstacles = obstacles.concat(newObstacles);
-            }
+        function startGame() {
+            gameStarted = true;
+            startButton.style.display = "none";
+            updateGame();
         }
 
         function resetGame() {
@@ -170,8 +172,9 @@
             speed = 2;
             gameOver = false;
             paused = false;
+            gameStarted = false;
             scoreDisplay.textContent = "Skor: 0";
-            updateGame();
+            startButton.style.display = "block";
         }
 
         function togglePause() {
@@ -189,11 +192,12 @@
             }, 2000);
         }
 
+        startButton.addEventListener("click", startGame);
         gachaButton.addEventListener("click", gacha);
         document.getElementById("pauseButton").addEventListener("click", togglePause);
         document.getElementById("tryAgain").addEventListener("click", resetGame);
 
-        setInterval(createObstacle, 1500);
+        setInterval(() => { if (gameStarted) createObstacle(); }, 1500);
     </script>
 </body>
 </html>
