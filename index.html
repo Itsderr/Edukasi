@@ -133,9 +133,12 @@
             if (!paused) {
                 let newObstacles = [];
                 let randomPattern = Array.from({ length: 5 }, () => Math.random() < 0.5 ? 1 : 0);
+                let emptyLane = Math.floor(Math.random() * 5);
+                randomPattern[emptyLane] = 0;
+                
                 for (let i = 0; i < randomPattern.length; i++) {
                     if (randomPattern[i] === 1) {
-                        newObstacles.push({ x: lanes[i], y: 0, width: 50, height: 80, speed: speed });
+                        newObstacles.push({ x: lanes[i], y: -100, width: 50, height: 80, speed: speed });
                     }
                 }
                 obstacles = obstacles.concat(newObstacles);
@@ -180,7 +183,7 @@
         document.getElementById("pauseButton").addEventListener("click", togglePause);
         document.getElementById("tryAgain").addEventListener("click", resetGame);
 
-        setInterval(createObstacle, 1200);
+        setInterval(createObstacle, 1500);
     </script>
 </body>
 </html>
