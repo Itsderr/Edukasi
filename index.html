@@ -110,17 +110,12 @@
 
         function createObstacle() {
             if (!paused) {
-                let lane = Math.floor(Math.random() * 3); // 0 = kiri, 1 = tengah, 2 = kanan
-                let x;
-                let speed = 5; // Semua rintangan memiliki kecepatan yang sama sekarang
-                if (lane === 0) {
-                    x = 50;
-                } else if (lane === 1) {
-                    x = 175;
-                } else {
-                    x = 300;
+                let lanes = [50, 175, 300];
+                let speed = 5;
+                obstacles = [];
+                for (let x of lanes) {
+                    obstacles.push({ x: x, y: 0, width: 50, height: 80, speed: speed });
                 }
-                obstacles.push({ x: x, y: 0, width: 50, height: 80, speed: speed });
             }
         }
 
