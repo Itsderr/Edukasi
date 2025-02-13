@@ -8,7 +8,8 @@
         body {
             text-align: center;
             font-family: Arial, sans-serif;
-            background-color: #ddd;
+            background: url('mobil-sport.jpg') no-repeat center center fixed;
+            background-size: cover;
         }
         canvas {
             background: #f5deb3;
@@ -21,6 +22,7 @@
             cursor: pointer;
             color: white;
             border: none;
+            z-index: 10;
         }
         #pauseButton {
             top: 10px;
@@ -40,6 +42,8 @@
             padding: 20px;
             font-size: 20px;
             position: fixed;
+            z-index: 100;
+            display: block;
         }
         #scoreDisplay {
             font-size: 24px;
@@ -50,13 +54,13 @@
             right: 10px;
             background: green;
         }
-        #gachaResult {
+        #gachaResults {
             position: absolute;
             top: 50px;
             right: 10px;
             background: yellow;
             padding: 10px;
-            display: none;
+            width: 150px;
         }
     </style>
 </head>
@@ -67,14 +71,14 @@
     <button id="tryAgain" class="button">Try Again</button>
     <button id="gachaButton" class="button">Gacha</button>
     <button id="startButton">Start</button>
-    <div id="gachaResult"></div>
+    <div id="gachaResults">Gacha Result: <ul id="gachaList"></ul></div>
     <canvas id="gameCanvas" width="400" height="600"></canvas>
     <script>
         const canvas = document.getElementById("gameCanvas");
         const ctx = canvas.getContext("2d");
         const scoreDisplay = document.getElementById("scoreDisplay");
         const gachaButton = document.getElementById("gachaButton");
-        const gachaResult = document.getElementById("gachaResult");
+        const gachaList = document.getElementById("gachaList");
         const startButton = document.getElementById("startButton");
         
         const playerImg = new Image();
@@ -82,6 +86,7 @@
         let imagesLoaded = 0;
         let speed = 2;
         let gameStarted = false;
+        let gachaResults = [];
         
         function checkAllImagesLoaded() {
             imagesLoaded++;
@@ -106,18 +111,6 @@
         function drawRoad() {
             ctx.fillStyle = "#f5deb3";
             ctx.fillRect(0, 0, canvas.width, canvas.height);
-            
-            ctx.fillStyle = "#d2b48c";
-            ctx.fillRect(75, 0, 250, canvas.height);
-            
-            ctx.strokeStyle = "white";
-            ctx.lineWidth = 5;
-            for (let i = 0; i < canvas.height; i += 40) {
-                ctx.beginPath();
-                ctx.moveTo(canvas.width / 2, i);
-                ctx.lineTo(canvas.width / 2, i + 20);
-                ctx.stroke();
-            }
         }
 
         function drawPlayer() {
@@ -153,12 +146,15 @@
                 ) {
                     gameOver = true;
                     alert("Game Over! Skor: " + score);
+                    gachaResults = [];
+                    updateGachaDisplay();
                 }
             }
             requestAnimationFrame(updateGame);
         }
 
         function startGame() {
+            console.log("Tombol Start Ditekan");
             gameStarted = true;
             startButton.style.display = "none";
             updateGame();
@@ -175,6 +171,8 @@
             gameStarted = false;
             scoreDisplay.textContent = "Skor: 0";
             startButton.style.display = "block";
+            gachaResults = [];
+            updateGachaDisplay();
         }
 
         function togglePause() {
@@ -185,19 +183,25 @@
         function gacha() {
             const rewards = ["Boost Speed", "Extra Life", "Shield", "No Effect"];
             const result = rewards[Math.floor(Math.random() * rewards.length)];
-            gachaResult.textContent = "Gacha Result: " + result;
-            gachaResult.style.display = "block";
-            setTimeout(() => {
-                gachaResult.style.display = "none";
-            }, 2000);
+            if (gachaResults.length < 5) {
+                gachaResults.push(result);
+            }
+            updateGachaDisplay();
+        }
+
+        function updateGachaDisplay() {
+            gachaList.innerHTML = "";
+            gachaResults.forEach(item => {
+                let li = document.createElement("li");
+                li.textContent = item;
+                gachaList.appendChild(li);
+            });
         }
 
         startButton.addEventListener("click", startGame);
         gachaButton.addEventListener("click", gacha);
         document.getElementById("pauseButton").addEventListener("click", togglePause);
         document.getElementById("tryAgain").addEventListener("click", resetGame);
-
-        setInterval(() => { if (gameStarted) createObstacle(); }, 1500);
     </script>
 </body>
 </html>
