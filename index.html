@@ -120,12 +120,13 @@
                 let pattern = patterns[patternIndex % patterns.length];
                 patternIndex++;
                 
-                obstacles = [];
+                let newObstacles = [];
                 for (let i = 0; i < pattern.length; i++) {
                     if (pattern[i] === 1) {
-                        obstacles.push({ x: lanes[i], y: 0, width: 50, height: 80, speed: speed });
+                        newObstacles.push({ x: lanes[i], y: 0, width: 50, height: 80, speed: speed });
                     }
                 }
+                obstacles = obstacles.concat(newObstacles);
             }
         }
 
