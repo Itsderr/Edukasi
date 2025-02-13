@@ -116,13 +116,13 @@
                 let speed;
                 if (lane === 0) {
                     x = 50;
-                    speed = 5; // kiri lebih cepat
+                    speed = 7; // kiri lebih cepat
                 } else if (lane === 1) {
                     x = 175;
-                    speed = 3; // tengah kecepatan sedang
+                    speed = 5; // tengah lebih cepat dari sebelumnya
                 } else {
                     x = 300;
-                    speed = 2; // kanan lebih lambat
+                    speed = 3; // kanan tetap lebih lambat
                 }
                 obstacles.push({ x: x, y: 0, width: 50, height: 80, speed: speed });
             }
@@ -164,7 +164,7 @@
         document.getElementById("pauseButton").addEventListener("click", togglePause);
         document.getElementById("tryAgain").addEventListener("click", resetGame);
 
-        setInterval(createObstacle, 2000);
+        setInterval(createObstacle, 1500);
         updateGame();
     </script>
 </body>
