@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+\<!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="UTF-8">
@@ -83,23 +83,13 @@
         
         const playerImg = new Image();
         const obstacleImg = new Image();
-        let imagesLoaded = 0;
         let speed = 2;
         let gameStarted = false;
-        let gachaResults = [];
+        let gachaResult = "No Effect";
+        let gachaAttempts = 5;
         
-        function checkAllImagesLoaded() {
-            imagesLoaded++;
-            if (imagesLoaded === 2 && gameStarted) {
-                updateGame();
-            }
-        }
-
-        playerImg.src = 'mobil.png'; 
-        playerImg.onload = checkAllImagesLoaded;
-        
+        playerImg.src = 'mobil.png';
         obstacleImg.src = 'rintangan.png';
-        obstacleImg.onload = checkAllImagesLoaded;
 
         let player = { x: 175, y: 500, width: 50, height: 80 };
         let obstacles = [];
@@ -107,17 +97,13 @@
         let gameOver = false;
         let paused = false;
         const lanes = [25, 100, 175, 250, 325];
+        let obstacleInterval = 2000;
 
-        function drawRoad() {
+        function drawGame() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
             ctx.fillStyle = "#f5deb3";
             ctx.fillRect(0, 0, canvas.width, canvas.height);
-        }
-
-        function drawPlayer() {
             ctx.drawImage(playerImg, player.x, player.y, player.width, player.height);
-        }
-
-        function drawObstacles() {
             for (let obs of obstacles) {
                 ctx.drawImage(obstacleImg, obs.x, obs.y, obs.width, obs.height);
             }
@@ -125,10 +111,7 @@
 
         function updateGame() {
             if (!gameStarted || gameOver || paused) return;
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            drawRoad();
-            drawPlayer();
-            drawObstacles();
+            drawGame();
 
             for (let obs of obstacles) {
                 obs.y += obs.speed;
@@ -136,6 +119,7 @@
                     obstacles.shift();
                     score++;
                     speed += 0.1;
+                    obstacleInterval = Math.max(500, obstacleInterval - 50);
                     scoreDisplay.textContent = "Skor: " + score;
                 }
                 if (
@@ -146,18 +130,24 @@
                 ) {
                     gameOver = true;
                     alert("Game Over! Skor: " + score);
-                    gachaResults = [];
-                    updateGachaDisplay();
+                    resetGame();
                 }
             }
             requestAnimationFrame(updateGame);
         }
 
         function startGame() {
-            console.log("Tombol Start Ditekan");
             gameStarted = true;
             startButton.style.display = "none";
+            obstacles = [];
+            spawnObstacle();
             updateGame();
+        }
+
+        function spawnObstacle() {
+            if (!gameStarted || gameOver) return;
+            obstacles.push({ x: lanes[Math.floor(Math.random() * lanes.length)], y: -80, width: 50, height: 80, speed: speed });
+            setTimeout(spawnObstacle, obstacleInterval);
         }
 
         function resetGame() {
@@ -166,41 +156,36 @@
             obstacles = [];
             score = 0;
             speed = 2;
+            obstacleInterval = 2000;
             gameOver = false;
             paused = false;
             gameStarted = false;
             scoreDisplay.textContent = "Skor: 0";
             startButton.style.display = "block";
-            gachaResults = [];
+            gachaResult = "No Effect";
+            gachaAttempts = 5;
             updateGachaDisplay();
-        }
-
-        function togglePause() {
-            paused = !paused;
-            if (!paused) updateGame();
         }
 
         function gacha() {
-            const rewards = ["Boost Speed", "Extra Life", "Shield", "No Effect"];
-            const result = rewards[Math.floor(Math.random() * rewards.length)];
-            if (gachaResults.length < 5) {
-                gachaResults.push(result);
+            if (gachaAttempts > 0) {
+                const rewards = ["Boost Speed", "Extra Life", "Shield", "No Effect"];
+                gachaResult = rewards[Math.floor(Math.random() * rewards.length)];
+                gachaAttempts--;
+                updateGachaDisplay();
             }
-            updateGachaDisplay();
         }
 
         function updateGachaDisplay() {
             gachaList.innerHTML = "";
-            gachaResults.forEach(item => {
-                let li = document.createElement("li");
-                li.textContent = item;
-                gachaList.appendChild(li);
-            });
+            let li = document.createElement("li");
+            li.textContent = gachaResult;
+            gachaList.appendChild(li);
         }
 
         startButton.addEventListener("click", startGame);
         gachaButton.addEventListener("click", gacha);
-        document.getElementById("pauseButton").addEventListener("click", togglePause);
+        document.getElementById("pauseButton").addEventListener("click", () => { paused = !paused; if (!paused) updateGame(); });
         document.getElementById("tryAgain").addEventListener("click", resetGame);
     </script>
 </body>
