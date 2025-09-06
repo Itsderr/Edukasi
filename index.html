@@ -1,184 +1,100 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Game Balapan</title>
-    <style>
-        body {
-            text-align: center;
-            font-family: Arial, sans-serif;
-            background: url('mobil-sport.jpg') no-repeat center center fixed;
-            background-size: cover;
-        }
-        canvas {
-            display: block;
-            margin: auto;
-            background: url('jalan-raya.jpg') repeat-y;
-            background-size: cover;
-        }
-        .button {
-            position: absolute;
-            padding: 10px;
-            cursor: pointer;
-            color: white;
-            border: none;
-            z-index: 10;
-        }
-        #pauseButton {
-            top: 10px;
-            left: 10px;
-            background: red;
-        }
-        #tryAgain {
-            top: 50px;
-            left: 10px;
-            background: blue;
-        }
-        #startButton {
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: orange;
-            padding: 20px;
-            font-size: 20px;
-            position: fixed;
-            z-index: 100;
-            display: block;
-        }
-        #scoreDisplay {
-            font-size: 24px;
-            font-weight: bold;
-        }
-        #gachaContainer {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            display: flex;
-            align-items: center;
-        }
-        #gachaButton {
-            background: green;
-            margin-right: 10px;
-        }
-        #gachaAttemptsDisplay {
-            background: lightgray;
-            padding: 5px;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <title>Traffic Alert SMA (Voting + Status Tengah)</title>
+  <style>
+    body { font-family: Arial, sans-serif; background: #f4f4f4; text-align: center; }
+    h1 { color: #333; }
+    .card { padding: 15px; margin: 10px auto; border-radius: 10px; width: 80%; font-weight: bold; }
+    .macet { background: #ff4d4d; color: white; }
+    .padat { background: #ffcc00; color: black; }
+    .lancar { background: #4caf50; color: white; }
+    .lumayan { background: #ff9966; color: white; }
+    .form { margin: 20px; }
+  </style>
 </head>
 <body>
-    <h1>Game Balapan Sederhana</h1>
-    <div id="scoreDisplay">Skor: 0</div>
-    <button id="pauseButton" class="button">Pause</button>
-    <button id="tryAgain" class="button">Try Again</button>
-    <button id="startButton">Start</button>
-    <div id="gachaContainer">
-        <button id="gachaButton" class="button">Gacha</button>
-        <div id="gachaAttemptsDisplay">Kesempatan Gacha: 5</div>
-    </div>
-    <canvas id="gameCanvas" width="400" height="600"></canvas>
-    <script>
-        const canvas = document.getElementById("gameCanvas");
-        const ctx = canvas.getContext("2d");
-        const scoreDisplay = document.getElementById("scoreDisplay");
-        const startButton = document.getElementById("startButton");
 
-        const playerImg = new Image();
-        const obstacleImg = new Image();
-        const roadImg = new Image();
-        
-        playerImg.src = 'mobil.png';
-        obstacleImg.src = 'rintangan.png';
-        roadImg.src = 'jalan-raya.jpg';
+  <h1>🚦 Traffic Alert SMA</h1>
+  <div class="form">
+    <input type="text" id="lokasi" placeholder="Lokasi jalan" />
+    <select id="status">
+      <option value="macet">🔴 Macet</option>
+      <option value="padat">🟡 Padat</option>
+      <option value="lancar">🟢 Lancar</option>
+    </select>
+    <button onclick="kirimLaporan()">Kirim</button>
+  </div>
 
-        let speed = 2;
-        let gameStarted = false;
-        let roadOffset = 0;
-        let player = { x: 175, y: 500, width: 50, height: 80 };
-        let obstacles = [];
-        let score = 0;
-        let gameOver = false;
-        let paused = false;
-        const lanes = [25, 100, 175, 250, 325];
-        let obstacleInterval = 2000;
+  <h2>Laporan Hasil Gabungan</h2>
+  <div id="laporan"></div>
 
-        function drawGame() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            ctx.drawImage(roadImg, 0, roadOffset, canvas.width, canvas.height * 2);
-            ctx.drawImage(playerImg, player.x, player.y, player.width, player.height);
-            for (let obs of obstacles) {
-                ctx.drawImage(obstacleImg, obs.x, obs.y, obs.width, obs.height);
-            }
+  <script>
+    let laporanList = [];
+
+    function kirimLaporan() {
+      const lokasi = document.getElementById("lokasi").value.trim();
+      const status = document.getElementById("status").value;
+      const timestamp = Date.now();
+
+      if (lokasi) {
+        laporanList.push({ lokasi, status, timestamp });
+        document.getElementById("lokasi").value = "";
+        tampilkanLaporan();
+      }
+    }
+
+    function tentukanStatus(votes) {
+      const { macet, padat, lancar } = votes;
+      const total = macet + padat + lancar;
+      if (total === 0) return "lancar"; // default
+
+      const maxVote = Math.max(macet, padat, lancar);
+      const selisih = maxVote - (total - maxVote);
+
+      // Kalau perbedaan suara kecil → status tengah
+      if (selisih <= 2) return "lumayan";
+
+      if (maxVote === macet) return "macet";
+      if (maxVote === padat) return "padat";
+      if (maxVote === lancar) return "lancar";
+      return "padat"; 
+    }
+
+    function tampilkanLaporan() {
+      const laporanDiv = document.getElementById("laporan");
+      laporanDiv.innerHTML = "";
+      const now = Date.now();
+
+      // Kelompokkan laporan per lokasi
+      const grouped = {};
+      laporanList.forEach(laporan => {
+        if (now - laporan.timestamp <= 5 * 60 * 1000) {
+          if (!grouped[laporan.lokasi]) {
+            grouped[laporan.lokasi] = { macet: 0, padat: 0, lancar: 0 };
+          }
+          grouped[laporan.lokasi][laporan.status]++;
         }
+      });
 
-        function updateGame() {
-            if (!gameStarted || gameOver || paused) return;
-            roadOffset += speed;
-            if (roadOffset >= canvas.height) roadOffset = 0;
-            drawGame();
+      // Tampilkan hasil gabungan
+      for (let lokasi in grouped) {
+        const finalStatus = tentukanStatus(grouped[lokasi]);
+        const div = document.createElement("div");
+        div.className = `card ${finalStatus}`;
+        let teksStatus = finalStatus.toUpperCase();
 
-            for (let obs of obstacles) {
-                obs.y += obs.speed;
-                if (obs.y > canvas.height) {
-                    obstacles.shift();
-                    score++;
-                    speed += 0.1;
-                    obstacleInterval = Math.max(500, obstacleInterval - 50);
-                    scoreDisplay.textContent = "Skor: " + score;
-                }
-                if (
-                    player.x < obs.x + obs.width &&
-                    player.x + player.width > obs.x &&
-                    player.y < obs.y + obs.height &&
-                    player.y + player.height > obs.y
-                ) {
-                    gameOver = true;
-                    alert("Game Over! Skor: " + score);
-                    resetGame();
-                }
-            }
-            requestAnimationFrame(updateGame);
-        }
+        if (finalStatus === "lumayan") teksStatus = "LUMAYAN LANCAR / CUKUP PADAT";
 
-        function startGame() {
-            gameStarted = true;
-            startButton.style.display = "none";
-            obstacles = [];
-            spawnObstacle();
-            updateGame();
-        }
+        div.innerText = `${lokasi} → ${teksStatus} 
+          (M:${grouped[lokasi].macet}, P:${grouped[lokasi].padat}, L:${grouped[lokasi].lancar})`;
+        laporanDiv.appendChild(div);
+      }
+    }
 
-        function spawnObstacle() {
-            if (!gameStarted || gameOver) return;
-            obstacles.push({ x: lanes[Math.floor(Math.random() * lanes.length)], y: -80, width: 50, height: 80, speed: speed });
-            setTimeout(spawnObstacle, obstacleInterval);
-        }
-
-        function resetGame() {
-            player.x = 175;
-            player.y = 500;
-            obstacles = [];
-            score = 0;
-            speed = 2;
-            obstacleInterval = 2000;
-            gameOver = false;
-            paused = false;
-            gameStarted = false;
-            scoreDisplay.textContent = "Skor: 0";
-            startButton.style.display = "block";
-        }
-
-        window.addEventListener("keydown", function(event) {
-            if (event.key === "a" || event.key === "ArrowLeft") {
-                if (player.x > 25) player.x -= 75;
-            } else if (event.key === "d" || event.key === "ArrowRight") {
-                if (player.x < 325) player.x += 75;
-            }
-            drawGame();
-        });
-
-        startButton.addEventListener("click", startGame);
-    </script>
+    // Auto update tiap 5 detik
+    setInterval(tampilkanLaporan, 5000);
+  </script>
 </body>
 </html>
