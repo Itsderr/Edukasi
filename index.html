@@ -1,100 +1,156 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8">
-  <title>Traffic Alert SMA (Voting + Status Tengah)</title>
-  <style>
-    body { font-family: Arial, sans-serif; background: #f4f4f4; text-align: center; }
-    h1 { color: #333; }
-    .card { padding: 15px; margin: 10px auto; border-radius: 10px; width: 80%; font-weight: bold; }
-    .macet { background: #ff4d4d; color: white; }
-    .padat { background: #ffcc00; color: black; }
-    .lancar { background: #4caf50; color: white; }
-    .lumayan { background: #ff9966; color: white; }
-    .form { margin: 20px; }
-  </style>
+    <meta charset="UTF-8">
+    <title>Traffic Alert SMA (Voting + Status Tengah)</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+        
+        .card {
+            background-color: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 10px auto;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .card:hover {
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+        
+        h2 {
+            color: #333;
+            margin-bottom: 15px;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        
+        th, td {
+            padding: 8px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        th {
+            background-color: #f8f9fa;
+        }
+    </style>
 </head>
 <body>
 
-  <h1>🚦 Traffic Alert SMA</h1>
-  <div class="form">
-    <input type="text" id="lokasi" placeholder="Lokasi jalan" />
-    <select id="status">
-      <option value="macet">🔴 Macet</option>
-      <option value="padat">🟡 Padat</option>
-      <option value="lancar">🟢 Lancar</option>
-    </select>
-    <button onclick="kirimLaporan()">Kirim</button>
-  </div>
+    <h1>🚦 Traffic Alert SMA (Voting + Status Tengah)</h1>
+    
+    <div class="card">
+        <input type="text" id="lokasi" placeholder="Masukkan Lokasi Jalan" style="width: 100%; margin-bottom: 15px;" />
+        <select id="status">
+            <option value="macet">🔴 Macet</option>
+            <option value="padat">🟡 Padat</option>
+            <option value="lancar">🟢 Lancar</option>
+        </select>
+        
+        <button onclick="kirimLaporan()" style="margin-top: 10px;">Kirim Laporan</button>
+    </div>
 
-  <h2>Laporan Hasil Gabungan</h2>
-  <div id="laporan"></div>
+    <h2>Laporan Hasil Gabungan</h2>
+    
+    <div id="laporan"></div>
 
-  <script>
-    let laporanList = [];
-
-    function kirimLaporan() {
-      const lokasi = document.getElementById("lokasi").value.trim();
-      const status = document.getElementById("status").value;
-      const timestamp = Date.now();
-
-      if (lokasi) {
-        laporanList.push({ lokasi, status, timestamp });
-        document.getElementById("lokasi").value = "";
-        tampilkanLaporan();
-      }
-    }
-
-    function tentukanStatus(votes) {
-      const { macet, padat, lancar } = votes;
-      const total = macet + padat + lancar;
-      if (total === 0) return "lancar"; // default
-
-      const maxVote = Math.max(macet, padat, lancar);
-      const selisih = maxVote - (total - maxVote);
-
-      // Kalau perbedaan suara kecil → status tengah
-      if (selisih <= 2) return "lumayan";
-
-      if (maxVote === macet) return "macet";
-      if (maxVote === padat) return "padat";
-      if (maxVote === lancar) return "lancar";
-      return "padat"; 
-    }
-
-    function tampilkanLaporan() {
-      const laporanDiv = document.getElementById("laporan");
-      laporanDiv.innerHTML = "";
-      const now = Date.now();
-
-      // Kelompokkan laporan per lokasi
-      const grouped = {};
-      laporanList.forEach(laporan => {
-        if (now - laporan.timestamp <= 5 * 60 * 1000) {
-          if (!grouped[laporan.lokasi]) {
-            grouped[laporan.lokasi] = { macet: 0, padat: 0, lancar: 0 };
-          }
-          grouped[laporan.lokasi][laporan.status]++;
+    <script>
+        let laporanList = [];
+        
+        function kirimLaporan() {
+            const lokasi = document.getElementById("lokasi").value.trim();
+            if (!lokasi) return;
+            
+            const status = document.getElementById("status").value;
+            const timestamp = Date.now();
+            
+            if (lokasi) {
+                // Mencegah masuk kembali selama 5 menit
+                if (timestamp - getLastEntryTime() > 300000) { // 5 menit = 300,000 ms
+                    laporanList.push({ lokasi, status, timestamp });
+                    updateLaporan();
+                    return;
+                }
+            }
+            
+            document.getElementById("lokasi").value = "";
         }
-      });
 
-      // Tampilkan hasil gabungan
-      for (let lokasi in grouped) {
-        const finalStatus = tentukanStatus(grouped[lokasi]);
-        const div = document.createElement("div");
-        div.className = `card ${finalStatus}`;
-        let teksStatus = finalStatus.toUpperCase();
+        function getLastEntryTime() {
+            return Array.from(laporanList).reduce((max, entry) => Math.max(max, entry.timestamp), 0);
+        }
 
-        if (finalStatus === "lumayan") teksStatus = "LUMAYAN LANCAR / CUKUP PADAT";
+        function tentukanStatus(votes) {
+            const { macet, padat, lancar } = votes;
+            const total = macet + padat + lancar;
+            if (total === 0) return "lancar"; // default
 
-        div.innerText = `${lokasi} → ${teksStatus} 
-          (M:${grouped[lokasi].macet}, P:${grouped[lokasi].padat}, L:${grouped[lokasi].lancar})`;
-        laporanDiv.appendChild(div);
-      }
-    }
+            const maxVote = Math.max(macet, padat, lancar);
+            const selisih = maxVote - (total - maxVote);
 
-    // Auto update tiap 5 detik
-    setInterval(tampilkanLaporan, 5000);
-  </script>
+            // Kalau perbedaan suara kecil → status tengah
+            if (selisih <= 2) return "lumayan";
+
+            if (maxVote === macet) return "macet";
+            if (maxVote === padat) return "padat";
+            if (maxVote === lancar) return "lancar";
+            return "padat"; 
+        }
+
+        function updateLaporan() {
+            const laporanDiv = document.getElementById("laporan");
+            laporanDiv.innerHTML = "";
+            const now = Date.now();
+
+            // Kelompokkan laporan per lokasi
+            const grouped = {};
+            laporanList.forEach(laporan => {
+                if (now - laporan.timestamp <= 5 * 60 * 1000) { // 5 menit dalam ms
+                    if (!grouped[laporan.lokasi]) {
+                        grouped[laporan.lokasi] = { macet: 0, padat: 0, lancar: 0 };
+                    }
+                    grouped[laporan.lokasi][laporan.status]++;
+                }
+            });
+
+            // Tampilkan hasil gabungan
+            for (let lokasi in grouped) {
+                const finalStatus = tentukanStatus(grouped[lokasi]);
+                let teks>Status = finalStatus.toUpperCase();
+
+                if (finalStatus === "lumayan") {
+                    teks>Status = "LUMAYAN LANCAR / CUKUP PADAT";
+                }
+
+                const tableRow = `
+                    <tr>
+                        <td-lokasi>${lokasi}</td>
+                        <td-gray>$finalStatus</td>
+                        <td-teks>Status M: ${grouped[lokasi].macet} P: ${grouped[lokasi].padat} L: ${grouped[lokasi].lancar}</td>
+                    </tr>
+                `;
+                
+                laporanDiv.innerHTML += tableRow;
+            }
+        }
+
+        // Auto update tiap 5 detik
+        setInterval(updateLaporan, 5000);
+    </script>
 </body>
 </html>
